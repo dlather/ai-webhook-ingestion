@@ -4,7 +4,9 @@ A FastAPI service that accepts arbitrary vendor webhook payloads, uses an LLM to
 normalize them into typed schemas, and stores the results asynchronously. Built for supply chain
 integrations where every vendor sends a different JSON structure. The architecture centres on a
 transactional outbox that guarantees durability before returning 202, and an async worker layer
-that keeps LLM latency off the request path entirely.
+that keeps LLM latency off the request path entirely. The architecture is deliberately
+more structured than a minimal prototype to demonstrate how production webhook ingestion patterns
+compose -- and to make extensibility concrete rather than hypothetical.
 
 ---
 
@@ -238,6 +240,30 @@ registry.register(
 That is it. No changes to the pipeline, API, worker, or database. The pipeline resolves the
 extraction schema from the registry at runtime, so the new type is live the moment the service
 restarts.
+
+---
+
+## Built With AI
+
+This project was architected and built using AI-assisted development throughout. The workflow:
+
+- **Architecture and system design**: I defined the outbox pattern, two-pass LLM pipeline,
+  schema registry, and quarantine strategy. These are design decisions that require understanding
+  of distributed systems tradeoffs -- they came from engineering judgment, not generation.
+
+- **Implementation**: AI generated the foundation code for each module (models, services, endpoints)
+  based on detailed specifications I provided. I reviewed, integrated, and fixed the seams between
+  components -- particularly the async worker lifecycle, the dedup race condition (unique constraint
+  + IntegrityError handling), and the outbox relay recovery logic.
+
+- **Testing**: TDD throughout -- test cases were specified first as acceptance criteria, then
+  implementation filled them in. The integration tests that exercise the full async pipeline
+  (HTTP -> DB -> relay -> queue -> worker -> LLM -> normalize) required manual iteration to get
+  the SQLite concurrency and asyncio timing right.
+
+- **Tradeoff decisions**: Every item in "What's Hacked" below was a conscious architectural
+  choice -- where to invest depth vs where to document and move on. AI accelerates the typing;
+  it does not make the tradeoff calls.
 
 ---
 
