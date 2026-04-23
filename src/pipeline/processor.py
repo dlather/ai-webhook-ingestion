@@ -52,11 +52,19 @@ class ProcessingPipeline:
             await self._update_raw_event_status(raw_event_id, "FAILED_TERMINAL")
             return ProcessingResult(status="FAILED_TERMINAL", error=str(exc))
 
+    _TERMINAL_STATUSES = {"COMPLETED", "QUARANTINED", "FAILED_TERMINAL"}
+
     async def _process_inner(self, raw_event_id: str) -> ProcessingResult:
         async with self._session_factory() as session:
             raw_event = await session.get(RawEvent, raw_event_id)
             if raw_event is None:
                 return ProcessingResult(status="FAILED_TERMINAL", error="Raw event not found")
+            # Idempotency guard: skip if already in a terminal state (e.g. relay re-dispatch)
+            if raw_event.status in self._TERMINAL_STATUSES:
+                logger.debug(
+                    "Skipping already-terminal event %s (status=%s)", raw_event_id, raw_event.status
+                )
+                return ProcessingResult(status=raw_event.status)
             payload: dict[str, object] = raw_event.raw_payload_json
 
         await self._update_raw_event_status(raw_event_id, "PROCESSING")

@@ -1,0 +1,22 @@
+..F..F...F.............................................................. [ 54%]
+...........................................................              [100%]
+=================================== FAILURES ===================================
+__ TestUnclassifiedWebhookE2E.test_garbage_payload_completes_as_unclassified ___
+tests/integration/test_e2e.py:134: in test_garbage_payload_completes_as_unclassified
+    assert final_status == "COMPLETED"
+E   AssertionError: assert None == 'COMPLETED'
+__________ TestDeduplicationE2E.test_weak_dedup_same_payload_detected __________
+tests/integration/test_e2e.py:270: in test_weak_dedup_same_payload_detected
+    assert second_response.status_code == 200
+E   assert 202 == 200
+E    +  where 202 = <Response [202 Accepted]>.status_code
+_______________ TestHealthE2E.test_ingestion_lookup_after_submit _______________
+tests/integration/test_e2e.py:322: in test_ingestion_lookup_after_submit
+    assert lookup_response.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = <Response [404 Not Found]>.status_code
+=========================== short test summary info ============================
+FAILED tests/integration/test_e2e.py::TestUnclassifiedWebhookE2E::test_garbage_payload_completes_as_unclassified
+FAILED tests/integration/test_e2e.py::TestDeduplicationE2E::test_weak_dedup_same_payload_detected
+FAILED tests/integration/test_e2e.py::TestHealthE2E::test_ingestion_lookup_after_submit
+3 failed, 128 passed in 5.04s

@@ -1,0 +1,2 @@
+- 2026-04-23: Switching integration tests to `StaticPool` plus slower relay polling removed the original SQLite lock failure, but the full suite still has intermittent integration regressions: unclassified processing times out, weak dedup sometimes returns a second 202 instead of duplicate 200, and ingestion lookup can return 404 immediately after submit.
+- 2026-04-23: Waiting on `event_queue.join()` before assertions was not sufficient to stabilize full-suite runs, which suggests the remaining issue is not just worker completion timing.

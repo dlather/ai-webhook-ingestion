@@ -1,0 +1,3 @@
+- 2026-04-23: Integration fixtures need a unique SQLite in-memory URI per test (`file:{uuid}?mode=memory&cache=shared` with `uri=True`) so one test's data never leaks into another.
+- 2026-04-23: `src/api/deps.py` holds module-level globals; tests must reset them in fixture teardown to avoid stale session factories and queues contaminating later tests.
+- 2026-04-23: E2E webhook payloads and dedupe IDs should include UUIDs unless a test is intentionally asserting duplicate behavior within the same test case.

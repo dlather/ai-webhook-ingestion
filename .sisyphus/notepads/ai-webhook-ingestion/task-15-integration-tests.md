@@ -1,0 +1,4 @@
+- 2026-04-23: Added end-to-end FastAPI integration coverage in `tests/integration/test_e2e.py` plus shared helpers in `tests/integration/conftest.py`.
+- Used a shared in-memory SQLite URL (`sqlite+aiosqlite:///file::memory:?cache=shared` with `uri=True`) so API requests, workers, and polling sessions all see the same transient database.
+- Added a polling helper capped at 3 seconds with 100ms intervals to wait for async worker completion without fixed sleeps.
+- Covered 10 flows: shipment, invoice, unclassified, low-confidence quarantine, strong dedup, weak dedup, validation errors, health, and ingestion lookup.
