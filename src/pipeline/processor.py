@@ -52,7 +52,7 @@ class ProcessingPipeline:
             await self._update_raw_event_status(raw_event_id, "FAILED_TERMINAL")
             return ProcessingResult(status="FAILED_TERMINAL", error=str(exc))
 
-    _TERMINAL_STATUSES = {"COMPLETED", "QUARANTINED", "FAILED_TERMINAL"}
+    _TERMINAL_STATUSES: set[str] = {"COMPLETED", "QUARANTINED", "FAILED_TERMINAL"}
 
     async def _process_inner(self, raw_event_id: str) -> ProcessingResult:
         async with self._session_factory() as session:
@@ -69,23 +69,7 @@ class ProcessingPipeline:
 
         await self._update_raw_event_status(raw_event_id, "PROCESSING")
 
-        try:
-            classification = await self._llm.classify(payload)
-        except Exception as exc:
-            await self._record_attempt(raw_event_id, "CLASSIFY", "FAILED", error=str(exc))
-            async with self._session_factory() as session:
-                svc = QuarantineService(session)
-                quarantine_event = await svc.quarantine(
-                    raw_event_id,
-                    QuarantineReasonCode.LLM_ERROR,
-                    str(exc),
-                )
-            return ProcessingResult(
-                status="QUARANTINED",
-                quarantine_id=quarantine_event.id,
-                error=str(exc),
-            )
-
+        classification = await self._llm.classify(payload)
         await self._record_attempt(raw_event_id, "CLASSIFY", "SUCCESS")
         event_type = classification.event_type
         confidence = classification.confidence
@@ -123,23 +107,7 @@ class ProcessingPipeline:
                 quarantine_id=quarantine_event.id,
             )
 
-        try:
-            extracted: BaseModel = await self._llm.extract(payload, event_type, entry.schema_class)
-        except Exception as exc:
-            await self._record_attempt(raw_event_id, "EXTRACT", "FAILED", error=str(exc))
-            async with self._session_factory() as session:
-                svc = QuarantineService(session)
-                quarantine_event = await svc.quarantine(
-                    raw_event_id,
-                    QuarantineReasonCode.EXTRACTION_FAILURE,
-                    str(exc),
-                )
-            return ProcessingResult(
-                status="QUARANTINED",
-                event_type=event_type,
-                quarantine_id=quarantine_event.id,
-            )
-
+        extracted: BaseModel = await self._llm.extract(payload, event_type, entry.schema_class)
         await self._record_attempt(raw_event_id, "EXTRACT", "SUCCESS")
 
         normalized_record_id = str(uuid.uuid4())

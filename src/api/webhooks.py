@@ -99,11 +99,8 @@ async def ingest_webhook(vendor: str, request: Request) -> JSONResponse:
             existing_id = result.scalar_one_or_none()
         return JSONResponse({"ingestion_id": existing_id, "status": "duplicate"}, status_code=200)
 
-    try:
-        event_queue = get_event_queue()
-        await event_queue.put(event_id)
-    except Exception as exc:
-        logger.warning(f"Failed to notify queue (relay will pick it up): {exc}")
+    event_queue = get_event_queue()
+    await event_queue.put(event_id)
 
     logger.info(f"Webhook accepted: ingestion_id={ingestion_id}, vendor={vendor}")
     return JSONResponse({"ingestion_id": ingestion_id, "status": "accepted"}, status_code=202)

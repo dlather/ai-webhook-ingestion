@@ -42,7 +42,4 @@ class EventProcessor:
                 self._queue.task_done()
 
     async def _process_one(self, raw_event_id: str) -> None:
-        try:
-            await self._pipeline.process(raw_event_id)
-        except Exception:
-            logger.exception("Pipeline failed for event %s", raw_event_id)
+        await self._pipeline.process(raw_event_id)

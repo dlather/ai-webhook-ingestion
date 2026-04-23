@@ -7,6 +7,7 @@ import logging
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from sqlalchemy import select, text
+from sqlalchemy.exc import SQLAlchemyError
 
 from src.api.deps import get_event_queue, get_session_factory
 from src.models.normalized_record import NormalizedRecord
@@ -24,7 +25,7 @@ async def health_check() -> JSONResponse:
         session_factory = get_session_factory()
         async with session_factory() as session:
             _ = await session.execute(text("SELECT 1"))
-    except Exception as exc:
+    except SQLAlchemyError as exc:
         logger.error(f"Health check DB error: {exc}")
         return JSONResponse(
             {"status": "unhealthy", "db": "disconnected", "error": str(exc)},
