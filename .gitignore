@@ -8,3 +8,10 @@ wheels/
 
 # Virtual environments
 .venv
+
+# SQLite databases (runtime + test artifacts)
+*.db
+*.db-shm
+*.db-wal
+file:*
+file::memory:
