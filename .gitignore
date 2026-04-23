@@ -9,9 +9,20 @@ wheels/
 # Virtual environments
 .venv
 
+# Secrets and credentials
+.env
+.env.*
+*.pem
+*.key
+*.secret
+credentials*
+
 # SQLite databases (runtime + test artifacts)
 *.db
 *.db-shm
 *.db-wal
 file:*
 file::memory:
+
+# Internal tooling state
+.sisyphus/

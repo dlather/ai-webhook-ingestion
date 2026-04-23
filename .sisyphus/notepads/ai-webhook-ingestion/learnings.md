@@ -1,6 +1,0 @@
-- 2026-04-23: Integration fixtures need a unique SQLite in-memory URI per test (`file:{uuid}?mode=memory&cache=shared` with `uri=True`) so one test's data never leaks into another.
-- 2026-04-23: `src/api/deps.py` holds module-level globals; tests must reset them in fixture teardown to avoid stale session factories and queues contaminating later tests.
-- 2026-04-23: E2E webhook payloads and dedupe IDs should include UUIDs unless a test is intentionally asserting duplicate behavior within the same test case.
-- 2026-04-23: Outbox stale-recovery must target `DISPATCHED` rows with old `processing_started_at` values because the relay never writes `PROCESSING`; querying that status leaves startup recovery as dead code.
-- 2026-04-23: `GET /ingestions/{id}` needs status-specific enrichment from `NormalizedRecord` and `QuarantineEvent` so completed ingestions expose `record_type` and quarantined ingestions expose `reason_code`.
-- 2026-04-23: Weak dedup requires a DB-level unique constraint on `(vendor, weak_payload_hash)` plus `IntegrityError` handling in the webhook write path to close the concurrent insert race.
