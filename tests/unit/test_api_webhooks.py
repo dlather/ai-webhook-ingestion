@@ -1,18 +1,15 @@
-import uuid
+# pyright: reportMissingParameterType=false, reportUnknownParameterType=false, reportUnknownVariableType=false, reportUnknownMemberType=false, reportUnknownArgumentType=false, reportUnusedParameter=false
+
 import pytest
 import httpx
 from httpx import ASGITransport
 from fastapi import FastAPI
-from fastapi.testclient import TestClient
 
 from src.db import create_engine, create_session_factory, init_db
 from src.models import RawEvent, OutboxEvent
-from src.services.dedup import DeduplicationService
 from src.worker.queue import EventQueue
 from src.api import webhooks
 from src.api.deps import (
-    get_session_factory,
-    get_event_queue,
     set_session_factory,
     set_event_queue,
 )

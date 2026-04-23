@@ -1,10 +1,11 @@
+# pyright: reportAny=false, reportArgumentType=false, reportPrivateUsage=false, reportUnknownMemberType=false, reportUnusedCallResult=false
+
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 from src.config import Settings
 from src.schemas.events import EventType, ClassificationResult
 from src.schemas.shipment import ShipmentUpdateV1, ShipmentStatus
-from src.schemas.invoice import InvoiceV1
 from src.services.llm.factory import create_llm_service
 from src.services.llm.mock import MockLLMService
 from src.services.llm.anthropic_service import AnthropicLLMService

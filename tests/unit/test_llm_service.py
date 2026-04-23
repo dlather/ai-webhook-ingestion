@@ -1,11 +1,9 @@
-import asyncio
-import pytest
+# pyright: reportUnknownArgumentType=false, reportUnknownMemberType=false, reportUnusedCallResult=false
 
 from src.schemas.events import EventType, ClassificationResult
 from src.schemas.shipment import ShipmentUpdateV1, ShipmentStatus
 from src.schemas.invoice import InvoiceV1
 from src.services.llm.mock import MockLLMService
-from src.services.llm.protocol import LLMService
 
 
 class TestLLMServiceProtocol:

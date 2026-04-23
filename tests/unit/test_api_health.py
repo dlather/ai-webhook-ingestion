@@ -9,7 +9,7 @@ from httpx import ASGITransport
 from fastapi import FastAPI
 
 from src.db import create_engine, create_session_factory, init_db
-from src.models import RawEvent
+from src.models import NormalizedRecord, QuarantineEvent, RawEvent
 from src.worker.queue import EventQueue
 from src.api import health
 from src.api.deps import set_session_factory, set_event_queue
@@ -72,6 +72,7 @@ class TestIngestionLookup:
     async def test_returns_200_for_known_event(self, client, setup):
         sf = setup["session_factory"]
         raw_id = str(uuid.uuid4())
+        quarantine_id = str(uuid.uuid4())
         async with sf() as session:
             session.add(
                 RawEvent(
@@ -81,7 +82,15 @@ class TestIngestionLookup:
                     weak_payload_hash="testhash",
                     content_type="application/json",
                     raw_payload_json={"test": 1},
-                    status="RECEIVED",
+                    status="QUARANTINED",
+                )
+            )
+            session.add(
+                QuarantineEvent(
+                    id=quarantine_id,
+                    raw_event_id=raw_id,
+                    reason_code="SCHEMA_MISMATCH",
+                    reason_details="payload did not match schema",
                 )
             )
             await session.commit()
@@ -91,11 +100,13 @@ class TestIngestionLookup:
         data = resp.json()
         assert data["ingestion_id"] == "ing_known123"
         assert data["vendor"] == "test-vendor"
-        assert data["status"] == "RECEIVED"
+        assert data["status"] == "QUARANTINED"
+        assert data["reason_code"] == "SCHEMA_MISMATCH"
 
     async def test_ingestion_response_shape(self, client, setup):
         sf = setup["session_factory"]
         raw_id = str(uuid.uuid4())
+        record_id = str(uuid.uuid4())
         async with sf() as session:
             session.add(
                 RawEvent(
@@ -108,6 +119,15 @@ class TestIngestionLookup:
                     status="COMPLETED",
                 )
             )
+            session.add(
+                NormalizedRecord(
+                    id=record_id,
+                    raw_event_id=raw_id,
+                    record_type="shipment_update",
+                    schema_version="v1",
+                    normalized_payload_json={},
+                )
+            )
             await session.commit()
 
         resp = await client.get("/ingestions/ing_shape_test")
@@ -116,3 +136,4 @@ class TestIngestionLookup:
         assert "vendor" in data
         assert "status" in data
         assert "received_at" in data
+        assert data["record_type"] == "shipment_update"

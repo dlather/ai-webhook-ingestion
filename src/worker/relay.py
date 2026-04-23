@@ -30,13 +30,13 @@ class OutboxRelay:
         self._poll_interval: float = poll_interval
 
     async def recover_stale(self) -> None:
-        """Reset stale outbox rows stuck in PROCESSING back to PENDING."""
+        """Reset stale outbox rows stuck in DISPATCHED back to PENDING."""
         cutoff = datetime.now(timezone.utc) - timedelta(minutes=_STALE_THRESHOLD_MINUTES)
 
         async with self._session_factory() as session:
             result = await session.execute(
                 select(OutboxEvent).where(
-                    OutboxEvent.status == "PROCESSING",
+                    OutboxEvent.status == "DISPATCHED",
                     OutboxEvent.processing_started_at <= cutoff,
                 )
             )
@@ -45,7 +45,7 @@ class OutboxRelay:
             for row in stale_rows:
                 row.status = "PENDING"
                 row.processing_started_at = None
-                logger.warning("Recovered stale outbox event: %s", row.id)
+                logger.warning("Recovered stale DISPATCHED event: %s", row.id)
 
             if stale_rows:
                 await session.commit()

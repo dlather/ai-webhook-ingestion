@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, JSON, String
+from sqlalchemy import DateTime, JSON, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.models.base import Base, TimestampMixin, utcnow
@@ -8,6 +8,13 @@ from src.models.base import Base, TimestampMixin, utcnow
 
 class RawEvent(TimestampMixin, Base):
     __tablename__: str = "raw_events"
+    __table_args__: tuple[UniqueConstraint, ...] = (
+        UniqueConstraint(
+            "vendor",
+            "weak_payload_hash",
+            name="uq_raw_events_vendor_payload",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     ingestion_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)

@@ -45,7 +45,7 @@ class TestEventQueue:
     async def test_depth_decreases_after_get(self):
         q = EventQueue(maxsize=10)
         await q.put("evt-x")
-        await q.get()
+        _ = await q.get()
         q.task_done()
         assert q.depth() == 0
 
@@ -114,7 +114,7 @@ class TestOutboxRelay:
             outbox = await session.get(OutboxEvent, outbox_id)
             assert outbox.status == "DISPATCHED"
 
-    async def test_recover_stale_resets_processing_rows(self, session_factory):
+    async def test_recover_stale_resets_dispatched_rows(self, session_factory):
         stale_id = str(uuid.uuid4())
         raw_id = str(uuid.uuid4())
         stale_time = datetime.now(timezone.utc) - timedelta(minutes=10)
@@ -138,7 +138,7 @@ class TestOutboxRelay:
                     aggregate_id=raw_id,
                     event_type="webhook.received",
                     payload_json={},
-                    status="PROCESSING",
+                    status="DISPATCHED",
                     processing_started_at=stale_time,
                 )
             )
