@@ -1,0 +1,40 @@
+[project]
+name = "ai-webhook-ingestion"
+version = "0.1.0"
+description = "AI webhook ingestion service"
+readme = "README.md"
+authors = [
+    { name = "Deepak Lather", email = "deepaklather2709@gmail.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "sqlalchemy[asyncio]",
+    "aiosqlite",
+    "pydantic",
+    "pydantic-settings",
+    "instructor",
+    "anthropic",
+    "httpx",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "ruff",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.7,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+
+[tool.uv]
+package = false
